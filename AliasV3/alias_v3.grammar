@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ufwb version="1.14">
+    <grammar name="Alias v3 Parser" start="id:301" author="Patrick Olsen" email="patrick.olsen@sysforenscs.org" uti="public.data">
+        <description>Grammar to parser alias files</description>
+        <scripts>
+            <script name="convertime" type="ProcessResults" id="204">
+                <source language="Python">def init():
+	print &quot;hello init&quot;
+
+def processResult(result):
+	print &quot;hello result&quot;
+
+  	resultType = result.getType()
+
+	if resultType == RESULT_STRUCTURE_START_TYPE:
+		print(&quot;Structure Start&quot;)
+	else:
+		print(&quot;other&quot;)
+
+	level = result.getLevel()
+ 	print (level)
+
+	name = result.getName()
+
+	value = result.getValue()
+
+	if( value != None ):
+		type = value.getType()
+		if type == VALUE_BINARY:
+			startPos = result.getStartBytePos()
+			length = result.getByteLength()
+			byteView = result.getByteView()
+			for x in range(length):
+				byte = byteView.readByte(startPos + x)
+			print &quot;Binary&quot;
+		elif type == VALUE_NUMBER_UNSIGNED:
+			print &quot;Unsigned: &quot; + str(value.getUnsigned())
+		elif type == VALUE_NUMBER_SIGNED:
+			print &quot;Signed: &quot; + str(value.getSigned())
+		elif type == VALUE_NUMBER_FLOAT:
+			print &quot;Float: &quot; + str(value.getFloat())
+		elif type == VALUE_STRING:
+			print &quot;String: &quot; + value.getString()
+
+	print result.getStringRepresentation()
+
+def terminate():
+	print &quot;hello terminate&quot;
+</source>
+            </script>
+        </scripts>
+        <structure name="Template" id="302" encoding="ISO_8859-1:1987" endian="big" signed="no"/>
+        <structure name="AliasData" id="304" length="aliasLength" extends="id:302">
+            <binary name="padding0" id="305" length="4"/>
+            <number name="aliasLength" id="306" type="integer" length="2"/>
+            <number name="aliasVersion" id="307" type="integer" length="2"/>
+            <number name="IsDirectoryKey" id="308" type="integer" length="2">
+                <fixedvalues>
+                    <fixedvalue name="File" value="0"/>
+                    <fixedvalue name="Folder" value="1"/>
+                </fixedvalues>
+            </number>
+            <binary name="padding1" id="309" length="2">
+                <description>Zeros in all my testing.</description>
+            </binary>
+            <binary name="VolumeCheckedDate" id="310" length="4"/>
+            <binary name="filesystemType" id="311" length="4">
+                <fixedvalues>
+                    <fixedvalue name="H+" value="0000482B"/>
+                </fixedvalues>
+            </binary>
+            <binary name="unknown0" id="312" fillcolor="A9A9A9" length="4"/>
+            <number name="parentCNID" id="313" type="integer" length="4"/>
+            <number name="targetCNID" id="314" type="integer" length="4"/>
+            <binary name="unknown1" id="315" length="2"/>
+            <binary name="FileFolderCreationDateKey" id="316" length="4"/>
+            <binary name="staticSomething" id="317" length="22">
+                <description>Appears to be the same set of numbers on a few Alias records i've checked.</description>
+            </binary>
+            <number name="numCNIDBytes" id="318" type="integer" length="4" display="binary"/>
+            <number name="CNIDs" id="319" repeatmax="(numCNIDBytes/65356)/4" type="integer" length="4" valueexpression="CNIDs/65356"/>
+            <number name="totalStringLen0" id="320" type="integer" length="2"/>
+            <number name="NameKeyLength" id="321" type="integer" length="2"/>
+            <string name="NameKey" id="322" type="fixed-length" length="NameKeyLength*2" encoding="UTF-16"/>
+            <number name="unknownNum0" id="323" type="integer" length="2"/>
+            <number name="totalStringLen1" id="324" type="integer" length="2"/>
+            <number name="VolNameLength" id="325" type="integer" length="2"/>
+            <string name="VolName" id="326" type="fixed-length" length="VolNameLength*2" encoding="UTF-16"/>
+            <number name="unknownNum1" id="327" type="integer" length="2"/>
+            <number name="PathLength" id="328" type="integer" length="2"/>
+            <string name="PathName" id="329" type="fixed-length" length="PathLength"/>
+            <binary name="unknown2" id="330" length="remaining"/>
+        </structure>
+        <structure name="Alias" id="301" encoding="ISO_8859-1:1987" endian="big" signed="no">
+            <structref name="AliasData" id="332" structure="id:304"/>
+        </structure>
+    </grammar>
+</ufwb>
